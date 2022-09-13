@@ -1,0 +1,49 @@
+\begin{tikzpicture}
+\begin{axis}[
+grid=both,
+minor grid style={gray!35},
+major grid style={gray!35},
+title = CDFs of the throughput values,
+xlabel=Throughput (Mbps),
+height=0.65\linewidth,
+width=1\linewidth,
+%ylabel=$\mathbb{E} \overbrace{a} \mathcal{L} $(years),
+ylabel= CDF ($\%$),
+%width=0.75\linewidth,
+%height=0.5\linewidth,
+%font=\tiny,
+%tick align=outside,
+%xtick pos = left,
+%ytick pos = left,
+ytick ={0, 0.25, 0.5, 0.75, 1.0},
+%yticklabels={0, 0.25, 0.5, 0.75, 1.0},
+%xtick={2.5,5,7.5,10,12.5,15,17.5},
+%xticklabels={1,2,3,4,5},
+%xticklabel style={align=center},
+%legend pos=south west,
+legend style={at={(1.0,0.35)}},
+xmin=0,xmax=60,
+%ymin=100,ymax= 225,
+every tick/.style={
+	black,
+	semithick,
+}]
+
+
+\addplot[blue!75, line width=2pt] 
+table[x=ground_truth_x,y=ground_truth_y,col sep=comma]{csv_data/cdf_ground_truth_data.csv};
+
+\addplot[red!75, line width=2pt] 
+table[x=central_x,y=central_y,col sep=comma]{csv_data/cdf_predictions_data.csv};
+
+\addplot[green!75, line width=2pt] 
+table[x=fed_x,y=fed_y,col sep=comma]{csv_data/cdf_predictions_data.csv};
+
+\addlegendentry{True Throughput Values};
+\addlegendentry{Central Model Predictions};
+\addlegendentry{Federated Learning Predictions};
+
+%\captionsetup[subfigure]{}
+\end{axis}
+
+\end{tikzpicture}

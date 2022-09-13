@@ -1,0 +1,47 @@
+\begin{tikzpicture}
+\begin{axis}[
+grid=both,
+minor grid style={gray!35},
+major grid style={gray!35},
+title = MAE During FL Training,
+xlabel=Communication Epochs,
+height=0.65\linewidth,
+width=1\linewidth,
+%ylabel=$\mathbb{E} \overbrace{a} \mathcal{L} $(years),
+ylabel= MAE Throughput (Mbps),
+%width=0.75\linewidth,
+%height=0.5\linewidth,
+%font=\tiny,
+%tick align=outside,
+%xtick pos = left,
+%ytick pos = left,
+%ytick ={120, 150, 180, 210},
+%yticklabels={20, 25, 30, 35},,
+%xtick={2.5,5,7.5,10,12.5,15,17.5},
+%xticklabels={1,2,3,4,5},
+%xticklabel style={align=center},
+%legend pos=south west,
+legend style={at={(0.95,0.615)}},
+xmin=0,xmax=275,
+%ymin=100,ymax= 225,
+every tick/.style={
+	black,
+	semithick,
+}]
+
+
+\addplot[blue!75, line width=2pt] 
+table[x=round,y=mae_val,col sep=comma]{csv_data/rmse_mae_for_report.csv};
+\addplot[red!75, line width=2pt] 
+table[x=round,y=mae_train,col sep=comma]{csv_data/rmse_mae_for_report.csv};
+
+
+
+
+\addlegendentry{Validation Set};
+\addlegendentry{Training Set};
+
+%\captionsetup[subfigure]{}
+\end{axis}
+
+\end{tikzpicture}

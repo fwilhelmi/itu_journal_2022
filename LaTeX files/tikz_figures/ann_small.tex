@@ -1,0 +1,250 @@
+\begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=\layersep]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt]
+    \tikzstyle{neuron}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+    \tikzstyle{input neuron}=[neuron, fill=green!50];
+    \tikzstyle{output neuron}=[neuron, fill=red!50, minimum size=25pt, ];
+    \tikzstyle{hidden neuron}=[neuron, fill=blue!50];
+    \tikzstyle{concat neuron}=[neuron, fill=blue!75];
+    \tikzstyle{annot} = [text width=9em, text centered]
+
+    % Draw the input layer nodes in two parts
+    % THE FIRST INPUT TO THE NEURAL NETWORK
+    \node[input neuron, ] (I-1) at (0,-1) {};
+    \node[input neuron, ] (I-2) at (0,-2) {};
+    \node[input neuron, ] (I-3) at (0,-3) {};
+    \node[input neuron, ] (I-4) at (0,-4) {};
+
+    % Draw the hidden layer 1 - part 1 nodes
+    \foreach \name / \y in {1,...,2}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H1-\name) at (\layersep,-\y ) {};
+    
+    % Draw the hidden layer 1 -part 1 nodes
+    \foreach \name / \y in {4,...,5}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H1-\name) at (\layersep,-\y ) {};
+            
+    
+    % Connect every node in the input layer with every node in the
+    % hidden layer 1.
+    \foreach \source in {1,...,4}
+        \foreach \dest in {1,...,2}
+            \path (I-\source) edge (H1-\dest);
+    \foreach \source in {1,...,4}
+        \foreach \dest in {4,...,5}
+            \path (I-\source) edge (H1-\dest);
+    
+    % Draw the hidden layer2 - Part 1 nodes
+    \foreach \name / \y in {1,...,3}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H2-\name) at (2*\layersep,1 - \y ) {};
+     
+     \foreach \name / \y in {5,...,7}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H2-\name) at (2*\layersep,1 - \y ) {};
+            
+    %Connect the hidden layers 1 and 2
+     \foreach \source in {1,...,2}
+        \foreach \dest in {1,...,3}
+            \path [black,   dotted] (H1-\source) edge (H2-\dest);
+    \foreach \source in {1,...,2}
+        \foreach \dest in {5,...,7}
+            \path [black,   dotted](H1-\source) edge (H2-\dest);
+    
+    \foreach \source in {4,...,5}
+        \foreach \dest in {1,...,2}
+            \path [black,   dotted](H1-\source) edge (H2-\dest);
+    \foreach \source in {4,...,5}
+        \foreach \dest in {5,...,7}
+            \path [black,   dotted](H1-\source) edge (H2-\dest);
+    
+    % INPUT PART TWO
+    \node[input neuron, ] (I-5) at (0,-7) {}; 
+    \node[input neuron, ] (I-6) at (0,-8) {};
+    \node[input neuron, ] (I-7) at (0,-9) {}; 
+    \node[input neuron, ] (I-8) at (0,-10) {};
+    \node[input neuron, ] (I-9) at (0,-11) {}; 
+    \node[input neuron, ] (I-10) at (0,-12) {};
+    \node[input neuron, ] (I-11) at (0,-13) {}; 
+    
+    % Draw the hidden layer 1 - part 2 nodes
+    \foreach \name / \y in {1,...,2}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H1_2-\name) at (\layersep,-7.5-\y ) {};
+    
+    % Draw the hidden layer 1 -part 2 nodes
+    \foreach \name / \y in {4,...,5}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H1_2-\name) at (\layersep,-7.5-\y ) {};
+    
+     % Connect every node in the input layer with every node in the
+    % hidden layer 1.
+    \foreach \source in {5,...,11}
+        \foreach \dest in {1,...,2}
+            \path (I-\source) edge (H1_2-\dest);
+    \foreach \source in {5,...,11}
+        \foreach \dest in {4,...,5}
+            \path (I-\source) edge (H1_2-\dest);
+    
+    % Draw the hidden layer2  - Part 2nodes
+    \foreach \name / \y in {1,...,3}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H2_2-\name) at (2*\layersep,-6.5 - \y ) {};
+     
+     \foreach \name / \y in {5,...,7}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H2_2-\name) at (2*\layersep,-6.5 - \y ) {};
+            
+    %Connect the hidden layers 1 and 2
+     \foreach \source in {1,...,2}
+        \foreach \dest in {1,...,3}
+            \path [black,   dotted](H1_2-\source) edge (H2_2-\dest);
+    \foreach \source in {1,...,2}
+        \foreach \dest in {5,...,7}
+            \path [black,   dotted](H1_2-\source) edge (H2_2-\dest);
+    
+    \foreach \source in {4,...,5}
+        \foreach \dest in {1,...,2}
+            \path [black,   dotted](H1_2-\source) edge (H2_2-\dest);
+    \foreach \source in {4,...,5}
+        \foreach \dest in {5,...,7}
+            \path [black,   dotted](H1_2-\source) edge (H2_2-\dest);
+    
+    % Draw the hidden layer3 nodes
+    \foreach \name / \y in {1,...,5}
+       \path[yshift=0.5cm]
+           node[concat neuron] (H3-\name) at (3*\layersep,-0.75-\y ) {};
+     
+     \foreach \name / \y in {7,...,11}
+        \path[yshift=0.5cm]
+            node[concat neuron] (H3-\name) at (3*\layersep,-0.75-\y ) {};
+    
+     %Connect the hidden layers 2 and  PART 1
+     \foreach \source in {1,...,3}
+        \foreach \dest in {1,...,5}
+            \path [black,   dotted](H2-\source) edge (H3-\dest);
+    \foreach \source in {1,...,3}
+        \foreach \dest in {7,...,11}
+            \path [black, dotted](H2-\source) edge (H3-\dest);
+    
+    \foreach \source in {5,...,7}
+        \foreach \dest in {1,...,5}
+            \path [black,   dotted](H2-\source) edge (H3-\dest);
+    \foreach \source in {5,...,7}
+        \foreach \dest in {7,...,11}
+            \path [black,   dotted](H2-\source) edge (H3-\dest);
+    
+    
+     %Connect the hidden layers 2 and  PART 2
+     \foreach \source in {1,...,3}
+        \foreach \dest in {1,...,5}
+            \path [black, dotted](H2_2-\source) edge (H3-\dest);
+    \foreach \source in {1,...,3}
+        \foreach \dest in {7,...,11}
+            \path [black, dotted](H2_2-\source) edge (H3-\dest);
+    
+    \foreach \source in {5,...,7}
+        \foreach \dest in {1,...,5}
+            \path [black,   dotted](H2_2-\source) edge (H3-\dest);
+    \foreach \source in {5,...,7}
+        \foreach \dest in {7,...,11}
+            \path [black,   dotted](H2_2-\source) edge (H3-\dest);
+            
+    % Draw the hidden layer4 nodes
+    \foreach \name / \y in {1,...,4}
+       \path[yshift=0.5cm]
+           node[hidden neuron] (H4-\name) at (4*\layersep,-1.75-\y ) {};
+     
+     \foreach \name / \y in {6,...,9}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H4-\name) at (4*\layersep,-1.75-\y ) {};
+    
+    %Connect the hidden layers 3 and 4
+     \foreach \source in {1,...,5}
+        \foreach \dest in {1,...,4}
+            \path [black, dotted](H3-\source) edge (H4-\dest);
+    \foreach \source in {1,...,5}
+        \foreach \dest in {6,...,9}
+            \path [black, dotted](H3-\source) edge (H4-\dest);
+    
+    %Connect the hidden layers 3 and 4
+     \foreach \source in {7,...,11}
+        \foreach \dest in {1,...,4}
+            \path [black, dotted](H3-\source) edge (H4-\dest);
+    \foreach \source in {7,...,11}
+        \foreach \dest in {6,...,9}
+            \path [black, dotted](H3-\source) edge (H4-\dest);
+    
+    %\foreach \source in {5,...,7}
+    %    \foreach \dest in {1,...,3}
+    %        \path (H3-\source) edge (H4-\dest);
+    %\foreach \source in {5,...,7}
+    %    \foreach \dest in {5,...,7}
+    %        \path (H3-\source) edge (H4-\dest);
+    
+    % HIDDEN LAYER 4, layer 5
+    
+     % Draw the hidden layer3 nodes
+    \foreach \name / \y in {1,...,5}
+       \path[yshift=0.5cm]
+           node[hidden neuron] (H5-\name) at (5*\layersep,-0.75-\y ) {};
+     
+     \foreach \name / \y in {7,...,11}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H5-\name) at (5*\layersep,-0.75-\y ) {};
+    
+       %Connect the hidden layers 3 and 4
+     \foreach \source in {1,...,4}
+        \foreach \dest in {1,...,5}
+            \path [black, dotted](H4-\source) edge (H5-\dest);
+    \foreach \source in {1,...,4}
+        \foreach \dest in {7,...,11}
+            \path [black, dotted](H4-\source) edge (H5-\dest);    
+    %Connect the hidden layers 3 and 4
+     \foreach \source in {6,...,9}
+        \foreach \dest in {1,...,5}
+            \path [black, dotted](H4-\source) edge (H5-\dest);
+    \foreach \source in {6,...,9}
+        \foreach \dest in {7,...,11}
+            \path [black, dotted](H4-\source) edge (H5-\dest);            
+    % connecting layer 4 and 5    
+    % Draw the output layer nodes    
+    %\foreach \name / \y in {2,...,4}
+    %	\node[output neuron, pin=right:Output \#\y] (O-\name) at (3*\layersep,-\y - 0.5) {};
+    \node[output neuron,] (O-1) at (6*\layersep, -6) {};
+    \node[output neuron, pin={[pin edge={->}]right:}] (O-1) at (6*\layersep, -6) {};
+        %\node[output neuron, pin=right:Output \#\y] (I-\name) at (3*\layersep,-\y) {};    
+    %Connect the hidden layer 4 and Output layer
+    \foreach \source in {1,...,5}
+            \path (H5-\source) edge (O-1);
+    \foreach \source in {7,...,11}
+            \path (H5-\source) edge (O-1);  
+            
+    %\node[output neuron,pin={[pin edge={->}]right:Output}, right of=H-3] (O) {};
+ %Vertical dots to represent a much larger Neural network
+    %\path (I-2) -- (I-5) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H1-2) -- (H1-4) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H1_2-2) -- (H1_2-4) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H2-3) -- (H2-5) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H2_2-3) -- (H2_2-5) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H3-5) -- (H3-7) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H4-4) -- (H4-6) node [black, font=\Huge, midway, sloped] {$\dots$};
+    \path (H5-5) -- (H5-7) node [black, font=\Huge, midway, sloped] {$\dots$};
+    %\path (O-2) -- (O-4) node [black, font=\Huge, midway, sloped] {$\dots$};
+    
+
+    % Connect every node in the hidden layer with the output layer
+    %\foreach \source in {1,...,5}
+    %    \path (H-\source) edge (O);
+
+    % Annotate the layers
+    \node[annot,above of=H2-1, node distance=1cm] (hl2) {Hidden layer 2 (2x256 neurons)};
+    \node[annot,left of=hl2] (hl1){Hidden layer 1 (2x128 neurons)};
+    \node[annot,left of=hl1] {Input layer };
+    \node[annot,right of=hl2] (hl3){Concatenate};
+    \node[annot,right of=hl3] (hl4){Hidden layer 3 (256 neurons)};
+    \node[annot,right of=hl4] (hl5){Hidden layer 4 (512 neurons)};
+    \node[annot,right of=hl5] {Output layer};
+    %\node[annot,right of=H2-3] {$1$};
+    %\node[annot,in of=H2-3] {$1$};
+\end{tikzpicture}

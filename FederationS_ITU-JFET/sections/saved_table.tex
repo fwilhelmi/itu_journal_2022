@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{ \ac{DNN} network parameters}
+\begin{tabular}{|c|c|c|}
+\hline
+\multirow{6}{*}{\begin{tabular}[c]{@{}c@{}} Network \\ architecture \end{tabular}} & Number of layers & $2$ (Fully-connected) \\ \cline{2-3} 
+ & Number of neurons & $20$ \\ \cline{2-3} 
+ & Weights initialisation & He \cite{He_2015_ICCV} \\ \cline{2-3} 
+ & Activation function & ReLu \cite{2018arXiv180308375A} \\ \cline{2-3} 
+ & Dropout & None \\ \cline{2-3} 
+ & Normalisation Input layer & ``Zero--center'' \\ \hline
+\multirow{5}{*}{\begin{tabular}[c]{@{}c@{}} Training \\ options \end{tabular}} & Solver name & Adam \cite{2014arXiv1412.6980K} \\ \cline{2-3} 
+ & Mini-batch size & $1000$ \\ \cline{2-3} 
+ & Number of Epochs & $50$ \\ \cline{2-3} 
+ & Learning rate & $10^{-3}$ \\ \cline{2-3} 
+ & L2 regularisation & $10^{-5}$ \\ \hline
+\end{tabular}
+\label{table:DNN_parameter}
+\end{table}

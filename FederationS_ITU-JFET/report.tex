@@ -1,0 +1,104 @@
+\documentclass[10pt,conference ]{IEEEtran}
+
+\input{input.tex}
+
+\title{FederationS: Federated Learning for Spatial Reuse in a multi-BSS scenario}
+
+\author{
+    Jernej Hribar and Andrea Bonfante\\ 
+    \\ The authors are with CONNECT Centre, Trinity College Dublin, Ireland
+    \\ email: \{jhribar,bonfanta\}@tcd.ie
+    %\thanks{Author~1, Author~2 are with CONNECT Centre, Trinity College Dublin, Ireland (e-mail: ).}
+    }%
+
+\input{acro_list}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\acresetall
+
+\section{Data Analysis}\label{Sec: Data Analysis}
+
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\textwidth]{figures/Correlation_heatmap_r.eps}
+	\caption{Representation of correlation matrix showing the correlation between different input and output variables of the dataset.}
+	\label{fig:Correlation heatmap}
+\end{figure*}
+
+First, we discuss how features are selected for the training process. 
+We use Version 1.3 of the dataset \cite{francesc_wilhelmi_2021_5506248} created for the problem statement ITU-ML5G-PS-004 of the ITU AI/ML Challenge (2021 edition). 
+More specifically, we consider Scenarios 2 and 3, containing $2000$ different IEEE 802.11ax deployments with 2-6 \acp{AP} and 1-4 \acp{STA} per \ac{AP}. 
+We start extracting the set of features available in the simulator's output file of each context, namely the \ac{OBSS}-\ac{PD} configuration, the \ac{RSSI}, the set of interference powers from other \acp{AP} sensed by the \ac{AP} in the reference \ac{BSS}, the \ac{SINR} and the throughput for each \ac{STA} served by the \ac{AP}.  
+Then, we consider the additional information available in the simulator's input file of each context.
+Here, we extract the coordinates of the \ac{AP} and the ones of the \ac{STA}. 
+Then, we compute the Euclidean distances from each \ac{STA} to the serving \ac{AP}.
+Moreover, we compute the number of \ac{STA} served by the \ac{AP} and the number of \acp{AP} interfering with the server \ac{AP} in the \ac{BSS} under analysis. 
+It is worth noting that these information can also be obtained  online in a real system. Indeed, the \ac{RSSI}, \ac{SINR} and throughput measurements can be reported periodically by each \acp{STA}. 
+Interference powers can be measured during the listen-before-transmit (LBT) phase at the \ac{AP}, employing multi-antenna processing techniques to separate the different interfering sources. 
+In addition, Time-of-Arrival (TOA) ranging techniques can determine the distance between \ac{STA} and \ac{AP} . 
+
+Before obtaining the final dataset, we preprocess the data through different steps. 
+First, we clean the input and output data parsed from the simulator files removing all non-numerical values from the dataset.
+Then, we arrange the data of each \ac{STA} to form 1-D vectors with $11$ numerical entries used as the input of the model and containing all measurements and system parameters. 
+Conversely, we define the \ac{STA} throughput as the target variable and output of the model. 
+To note that the features present entirely different ranges between maximum and minimum values and are expressed with different units of measurements, e.g. dBm for \ac{RSSI} and interference power, dB for \ac{SINR} and meters for distances. 
+To balance each feature's contribution to the overall model predictions, we re-scale the features with the Min-Max normalisation method that transforms all features' in the range $[0,1]$. 
+Finally, when input data are missing, like when the number of interfering \acp{AP} reported is less than the minimum recorded according to our system settings, we assign those values with $0$s. 
+The activation function that we will explain later is chosen to keep neurons inactive when $0$s are present at the input. 
+
+\begin{figure}[t]
+	\centering
+	\includestandalone[width=3.7in]{tikz_figures/ann_small}
+	\caption{Visualisation of the DNN structure used.}
+	\label{fig:DNN model}
+	%\vspace{-10pt}
+\end{figure}
+
+
+
+The results of data preprocessing are shown in Fig. \ref{fig:Correlation heatmap}, where we represent the correlation matrix between input and output variables. 
+Correlation values close to $0$ indicate a lack of relations and structure between the data corresponding to these variables, while correlation values close to $-1$ and $+1$ indicate a perfect negative and positive correlation between variables, respectively. 
+Looking to Fig. \ref{fig:Correlation heatmap} two main observations can be made: 
+\begin{enumerate}
+\item Most features show a strong positive or negative correlation with the output variable (throughput). 
+As expected, only the \ac{OBSS}-\ac{PD} feature does not directly affect the throughput. 
+Otherwise, the problem would be trivial to model. 
+Indeed, the \ac{OBSS}-\ac{PD} value is correlated to the \ac{RSSI} as discussed before, which affects \ac{SINR} and throughput variables, showing that relationships between input and output values of the system are not straightforward to characterise with domain-based models. 
+This justifies the adoption of \ac{DNN}, which are extensively used for their capabilities to model nonlinear relationships. 
+\item Two regions depicted with lighter colours  at the top left and at the bottom right of the correlation matrix identify two groups of features that show a strong positive correlation between input variables. 
+Thus, in the \ac{DNN} architecture design, these inputs of the model need to be fully connected. 
+In contrast, the two regions at the top right and bottom left are characterised by elements with close to zero correlation values, meaning that the relationship between features is not strong. 
+Therefore, these connections are expected to bring a low contribution to the predictions and can be dropped in the \ac{DNN} architecture design. 
+\end{enumerate}
+
+\section{DNN Model Design}\label{Sec:Centralised Solution}
+Based on the observations highlighted in Sec. \ref{Sec: Data Analysis}, we design the model architecture represented in Fig. \ref{fig:DNN model}.  
+First, we split the \ac{DNN} model into two parallel branches. 
+The inputs of the first branch are the features constituting the first block, i.e. \ac{RSSI}, \ac{SINR}, distance \ac{STA}-\ac{AP} and \ac{OBSS}-\ac{PD} threshold.
+At the same time, features like the number of \ac{STA}, the power received from interfering \acp{AP} and the number of interfering \acp{AP} form the second block of features and are used as input of the second branch. 
+The input layers are followed by two hidden layers defined for each branch separately. 
+We use a concatenation layer to merge the output of these two branches. 
+
+The result of the concatenation is then used as input of two additional hidden layers, which are connected to the output layer of the model. 
+We adopt the hyperbolic tangent (\emph{tanh}) activation function to provide positive and negative outputs and keep neurons inactive when the inputs are $0$s. Finally, we add dropout layers after each layer before the output layer to reduce overfitting. 
+
+
+\section{Federated Solution}\label{Sec: Federated Solution}
+\input{sections/federated_learning}
+
+
+\section{Acknowledgements}\label{Sec: Lesson Learned}
+We would like to thank Dr Francesc Wilhelmi for his comments and for organising the challenge related to the problem statement ITU-ML5G-PS-004 of the ITU AI/ML Challenge (2021 edition). 
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{mycollection}
+
+\end{document}

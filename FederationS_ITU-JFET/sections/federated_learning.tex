@@ -1,0 +1,75 @@
+Our \ac{FL} solution is based on the implementation outlined in \cite{federated_repo}. 
+In addition, our approach combines the trained weights in a novel way, which is designed specifically for this challenge and is based on the data acquired in each context. 
+
+\subsection{The Proposed Solution}
+
+Our proposed \ac{FL} solution follows the steps described in Algorithm \ref{alg:fed}. 
+In steps 1-5, we initialize the contexts and split them into train and validation sets. 
+After the initialization stage, the training takes place locally in a subset of $N_{tr}$ contexts, which are selected randomly at every communication epoch. 
+The training results, i.e., the trained neural network $\theta_i$ and its weights $w_i$ along with the number of data sample $n_i$, are then transmitted from the $N_{tr}$ contexts to the central server for aggregation. 
+After the aggregation, the central server sends back the global trained model to every context, which updates their local \ac{DNN} models. 
+The training cycle repeats for $T$ communication epochs. 
+
+One of the most important aspects of the \ac{FL} training consists of aggregating the weights at the central server. 
+Initially, we weighted the updates from each context equally, but such an approach resulted in a skewed performance toward contexts with more \ac{STA}. Such behaviour can be attributed to the fact that contexts with four \ac{STA} have twice as many samples as contexts with only two \ac{STA}. 
+Instead, our solution proposed to weight each context update based on the number of data samples used for the training in each context normalised by the number of \ac{STA} in the contexts. We denote this normalisation weights with $\alpha$. This approach improves the accuracy of the predictions of the throughput. 
+
+\begin{algorithm}[]
+ \caption{Proposed Federated Learning Solution.}
+ \begin{algorithmic}[1]
+    \State Initialise set $\mathbb{K}$,, i.e., init $K$ contexts with data samples
+    \State From $\mathbb{K}$, select $N_{eval}$ to create $\mathbb{K}_{val}$
+    \State Create a new set of contexts $\mathbb{K}_{tr} =  \mathbb{K} \cap \mathbb{K}_{val}$
+    \State Server initialises model parameters $\theta^0$ and $W^0$
+    \State The server transmits $\theta_k^0, w_k^0$ to $k$-th contexts
+    \For{communication epoch $t=1,T$}
+        \State Randomly select $N_{tr}$ contexts from $\mathbb{K}_{tr}$ to get $\mathbb{K}_{ep}$
+        \For{$i$-th context in $\mathbb{K}_{ep}$}
+        %\State The $i$-th context updates the model using %Adam Optimiser and MSE loss
+        \State Split context's samples in $\beta$ ($\frac{n_i}{B}$ batches of size $B$)
+        \State Where $n_i$ represents the number of data samples 
+        \For{batch $b$ in $\beta$}
+        \State  $\theta_i^t, w_i^t \leftarrow \theta_i^{t-1}, w_i^{t-1} - \eta \nabla l(\theta_i^{t-1}, w_i^{t-1};b)$
+        \EndFor
+        \State Determine weight $\alpha_i = n_i/N_{STA}$
+        \State Transmit $\theta_i^t$, $w_i^t$, and $\alpha_i$ to central server
+        \EndFor
+        \State Calculate data samples weight $\alpha_{t} = \sum^{N_{tr}}_{i=1} \alpha_i$
+        \State Update model: $\theta_k^t = \sum^{N_{tr}}_{i=1}  \frac{\alpha_i *\theta_i^t }{\alpha_t}$, $w_k^t = \sum^{N_{tr}}_{i=1}  \frac{\alpha_i w_i^t }{\alpha_t}$
+        \State The server transmits $\theta_k^t, w_k^t$ to $k$-th contexts
+    \EndFor
+ \State \textbf{Output:} $\theta^T$ and $w^T$
+ \end{algorithmic} \label{alg:fed}
+\end{algorithm}
+
+\subsection{Evaluation}
+To evaluate the performance of the proposed solution, we consider both \ac{RMSE} and \ac{MAE} metrics. 
+We perform the validation using five per cent of available contexts, randomly sampled from $\mathbb{K}$. In total we had 1946 available contexts, i.e., $K=1946$. Five percent of available contexts were  used for evaluation, i.e., $N_{eval}=97$. At every communication round, we selected 500 contexts randomly to perform training on, i.e., $N_{tr}=500$. Furthermore, the contexts we use during the training and validation set are kept separated to prevent the data leakage and to be able to recognise when the solution starts to over-fitting to the training data.
+
+\begin{figure}[]
+	\centering
+	\includestandalone{tikz_figures/mea_plot}
+	\caption{Representation of MAE over the number of communication epochs.}
+	\label{fig:MAE}
+	\vspace{-10pt}
+\end{figure} 
+
+In Fig. \ref{fig:MAE} we show how the \ac{MAE} decreases over the number of communication epochs. 
+The same trend occurs for the contexts that we use during the training process (Training set) as well as for the contexts that we use only for validation (Validation set). However, the validation throughput decrease is noisier as it sometimes increases between two consecutive communication epochs. Such behaviour is due to the random sampling approach as not all randomly selected sets $\mathbb{K}_{ep}$ wholesomely represent the system.
+
+The accuracy of the submitted predictions was $6.55$ Mbps, which is the second result among all the solutions submitted. We used a neural network that was trained for 250 communication rounds, i.e., $T=250$.
+In Table \ref{table:parameters}, we report the list of hyper-parameters used in the submitted solution and related pre-trained \ac{DNN} can be found in the GitHub repository \cite{gitHub_federationF}.
+
+\begin{table}[]
+\centering
+\caption{Hyper-parameters}
+\begin{tabular}{|c|c|c|}
+ \hline
+\multirow{5}{*}{\begin{tabular}[c]{@{}c@{}} Neural Network\\ Training \\ options \end{tabular}} & Solver name & Adam \cite{2014arXiv1412.6980K} \\ \cline{2-3} 
+ & Batch size $B$ & $21$ \\ \cline{2-3} 
+ & Dropout & $10\%$ \\ \cline{2-3} 
+ & Learning rate & $10^{-4}$ \\ \cline{2-3} 
+ & L2 regularisation & $10^{-5}$ \\ \hline
+\end{tabular}
+\label{table:parameters}
+\end{table}
